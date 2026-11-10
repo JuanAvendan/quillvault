@@ -1,0 +1,122 @@
+[project]
+name = "quillvault"
+version = "0.1.0"
+description = "Private, offline handwriting OCR for sensitive documents. Your images never leave your machine."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Juan Avendaño", email = "84890303+JuanAvendan@users.noreply.github.com" }
+]
+requires-python = ">=3.12,<3.14"
+keywords = ["ocr", "htr", "handwriting-recognition", "privacy", "offline", "healthcare", "onnx", "directml", "trocr"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Healthcare Industry",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+    "Topic :: Security",
+    "Typing :: Typed",
+]
+dependencies = [
+    "httpx>=0.28.1",
+    "jiwer>=4.0.0",
+    "numpy>=2.0",
+    "opencv-python-headless>=4.10",
+    "pillow>=11.0",
+    "rapidfuzz>=3.10",
+    "rapidocr>=3.10.0",
+    "typer>=0.15",
+]
+
+[project.optional-dependencies]
+# Pick exactly ONE ONNX Runtime flavour.
+cpu = ["onnxruntime>=1.20"]
+directml = ["onnxruntime-directml>=1.20; sys_platform == 'win32'"]
+# Handwriting recogniser (TrOCR). Runs on CPU.
+trocr = ["transformers>=4.46", "torch>=2.4", "safetensors>=0.4", "huggingface-hub>=0.26"]
+# Local review UI.
+ui = ["gradio>=5.0"]
+# Practice-sheet generator (synthetic, non-sensitive dataset).
+templates = ["reportlab>=4.2", "faker>=30.0"]
+# PDF input.
+pdf = ["pypdfium2>=4.30"]
+
+[project.scripts]
+quillvault = "quillvault.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/JuanAvendan/quillvault"
+Issues = "https://github.com/JuanAvendan/quillvault/issues"
+Security = "https://github.com/JuanAvendan/quillvault/security/policy"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.13",
+    "pip-audit>=2.7",
+    "pre-commit>=4.0",
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "ruff>=0.8",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.7,<0.14.0"]
+build-backend = "uv_build"
+
+[tool.uv]
+conflicts = [[{ extra = "cpu" }, { extra = "directml" }]]
+
+# ---------------------------------------------------------------- ruff
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "S", "C4", "SIM", "RUF", "PTH", "PL", "TRY", "ARG"]
+ignore = [
+    "PLR0913",  # CLI commands and UI callbacks take one parameter per option
+    "PLR0917",
+    "PLR2004",  # magic numbers in image processing are self-explanatory
+    "TRY003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "PLR2004", "ARG", "PLC0415"]
+"tools/**" = ["S", "T201"]
+
+# ---------------------------------------------------------------- mypy
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+mypy_path = "src"
+
+[[tool.mypy.overrides]]
+# Third-party ML/imaging libraries: treat as Any (their stubs are partial or absent).
+module = ["rapidocr", "rapidocr.*", "jiwer", "jiwer.*", "transformers", "transformers.*", "torch", "torch.*", "gradio", "gradio.*", "reportlab.*", "faker", "faker.*", "pypdfium2", "pypdfium2.*", "cv2", "cv2.*", "onnxruntime", "onnxruntime.*", "huggingface_hub", "huggingface_hub.*"]
+ignore_missing_imports = true
+follow_imports = "skip"
+
+[[tool.mypy.overrides]]
+# Thin wrappers whose return value comes straight from OpenCV (untyped).
+module = ["quillvault.imaging.*", "quillvault.engines.*"]
+warn_return_any = false
+
+# ---------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "models: needs downloaded models (skipped in CI by default)",
+]
+
+[tool.coverage.run]
+source = ["quillvault"]
+branch = true

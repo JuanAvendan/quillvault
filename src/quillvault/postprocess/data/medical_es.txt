@@ -1,0 +1,215 @@
+# Vocabulario clínico genérico en español (lista original de QuillVault, Apache-2.0).
+# Un término por línea. Amplíelo con las tablas oficiales (CIE-10, CUPS, CUM) usando --lexicon.
+paciente
+diagnóstico
+diagnóstico principal
+diagnóstico relacionado
+impresión diagnóstica
+motivo de consulta
+enfermedad actual
+antecedentes
+antecedentes personales
+antecedentes familiares
+antecedentes quirúrgicos
+antecedentes farmacológicos
+alergias
+examen físico
+signos vitales
+tensión arterial
+presión arterial
+frecuencia cardiaca
+frecuencia respiratoria
+temperatura
+saturación de oxígeno
+peso
+talla
+índice de masa corporal
+glucemia
+plan de manejo
+tratamiento
+conducta
+evolución
+pronóstico
+remisión
+interconsulta
+control
+cita de control
+consulta externa
+urgencias
+hospitalización
+cirugía
+procedimiento
+incapacidad
+fórmula médica
+medicamento
+dosis
+cada ocho horas
+cada doce horas
+cada veinticuatro horas
+vía oral
+vía intravenosa
+vía intramuscular
+vía subcutánea
+tableta
+cápsula
+jarabe
+ampolla
+miligramos
+mililitros
+gramos
+unidades
+días
+semanas
+meses
+años
+historia clínica
+fecha de nacimiento
+documento de identidad
+cédula de ciudadanía
+tarjeta de identidad
+registro civil
+régimen contributivo
+régimen subsidiado
+entidad promotora de salud
+prestador
+municipio
+departamento
+residencia
+teléfono
+dirección
+acompañante
+firma
+médico tratante
+enfermería
+hipertensión arterial
+hipertensión esencial
+diabetes mellitus
+dislipidemia
+hipotiroidismo
+asma
+enfermedad pulmonar obstructiva crónica
+neumonía
+bronquitis
+faringitis
+amigdalitis
+otitis
+sinusitis
+rinitis
+gastritis
+gastroenteritis
+diarrea
+estreñimiento
+dolor abdominal
+cefalea
+migraña
+lumbalgia
+cervicalgia
+artritis
+artrosis
+osteoporosis
+fractura
+esguince
+contusión
+herida
+quemadura
+infección urinaria
+cistitis
+pielonefritis
+insuficiencia renal
+insuficiencia cardiaca
+arritmia
+fibrilación auricular
+infarto
+angina
+accidente cerebrovascular
+epilepsia
+convulsión
+ansiedad
+depresión
+insomnio
+obesidad
+desnutrición
+anemia
+dengue
+embarazo
+control prenatal
+parto
+cesárea
+puerperio
+vacunación
+crecimiento y desarrollo
+tamizaje
+citología
+mamografía
+ecografía
+radiografía
+tomografía
+resonancia
+electrocardiograma
+hemograma
+creatinina
+nitrógeno ureico
+colesterol
+triglicéridos
+hemoglobina glicosilada
+uroanálisis
+coprológico
+acetaminofén
+paracetamol
+ibuprofeno
+naproxeno
+diclofenaco
+dipirona
+tramadol
+amoxicilina
+ampicilina
+cefalexina
+ceftriaxona
+azitromicina
+claritromicina
+ciprofloxacina
+nitrofurantoína
+metronidazol
+trimetoprim
+sulfametoxazol
+losartán
+enalapril
+amlodipino
+hidroclorotiazida
+metoprolol
+carvedilol
+furosemida
+espironolactona
+atorvastatina
+lovastatina
+metformina
+glibenclamida
+insulina
+levotiroxina
+omeprazol
+esomeprazol
+ranitidina
+loratadina
+cetirizina
+salbutamol
+beclometasona
+prednisolona
+prednisona
+dexametasona
+hidrocortisona
+ácido acetilsalicílico
+clopidogrel
+warfarina
+enoxaparina
+sertralina
+fluoxetina
+amitriptilina
+clonazepam
+lorazepam
+ácido fólico
+sulfato ferroso
+calcio
+vitamina
+suero oral
+solución salina
+lactato de ringer

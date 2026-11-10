@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked --extra cpu --extra templates --extra pdf
+      - name: Ruff (lint)
+        run: uv run ruff check --output-format=github src tests
+      - name: Ruff (format)
+        run: uv run ruff format --check src tests
+      - name: Mypy (strict)
+        run: uv run mypy src
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.12", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python }}
+      - run: uv sync --locked --extra cpu --extra templates --extra pdf
+      - name: "Tests (offline: RapidOCR models ship in the wheel)"
+        run: uv run pytest --cov --cov-report=xml
+      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.12'
+        with:
+          name: coverage
+          path: coverage.xml
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v6
+      - name: Audit dependencies for known vulnerabilities
+        run: |
+          uv export --frozen --all-extras --no-hashes --no-emit-project \
+            --no-group dev -o requirements-audit.txt
+          uvx pip-audit --strict --disable-pip -r requirements-audit.txt
+      - name: Scan for committed secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Block images/PDFs outside allowed folders
+        run: python scripts/check_sensitive_files.py $(git ls-files)

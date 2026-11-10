@@ -1,0 +1,54 @@
+# ---------------------------------------------------------------------------
+# SENSITIVE DATA — never commit real scans, datasets or OCR output.
+# (scripts/check_sensitive_files.py enforces this in pre-commit and CI.)
+# ---------------------------------------------------------------------------
+# Anchored to the repo root so package folders such as src/**/data/ are not ignored.
+/data/
+/datasets/
+/dataset/
+/samples/
+/scans/
+/inputs/
+/outputs/
+/exports/
+/practice/
+/practica/
+/models/
+*.jpg
+*.jpeg
+*.png
+*.tif
+*.tiff
+*.bmp
+*.webp
+*.heic
+*.pdf
+!docs/assets/**
+!tests/fixtures/synthetic/**
+benchmark_*.md
+benchmark_*.json
+
+# Python
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+requirements-audit.txt
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local tooling
+.claude/
