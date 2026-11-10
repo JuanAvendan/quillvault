@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import shutil
 import stat
+import sys
 import tempfile
 import time
 from collections.abc import Iterator
@@ -36,7 +37,7 @@ _OWNER_FILE = ".owner-pid"
 def _process_alive(pid: int) -> bool:
     if pid <= 0:
         return False
-    if os.name == "nt":
+    if sys.platform == "win32":
         import ctypes  # noqa: PLC0415
 
         kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
@@ -49,13 +50,14 @@ def _process_alive(pid: int) -> bool:
             return code.value == 259  # STILL_ACTIVE
         finally:
             kernel32.CloseHandle(handle)
-    try:
-        os.kill(pid, 0)
-    except ProcessLookupError:
-        return False
-    except PermissionError:
+    else:
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            return False
+        except PermissionError:
+            return True
         return True
-    return True
 
 
 def make_private_dir(prefix: str = "quillvault-") -> Path:

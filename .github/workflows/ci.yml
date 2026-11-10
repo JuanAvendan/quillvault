@@ -57,11 +57,17 @@ jobs:
         with:
           fetch-depth: 0
       - uses: astral-sh/setup-uv@v6
+      # `cpu` and `directml` are mutually exclusive extras, so audit each
+      # resolution separately (--all-extras would violate the declared conflict).
       - name: Audit dependencies for known vulnerabilities
         run: |
-          uv export --frozen --all-extras --no-hashes --no-emit-project \
-            --no-group dev -o requirements-audit.txt
-          uvx pip-audit --strict --disable-pip -r requirements-audit.txt
+          common="--extra trocr --extra ui --extra templates --extra pdf"
+          for backend in cpu directml; do
+            uv export --frozen --no-hashes --no-emit-project --no-group dev \
+              --extra "$backend" $common -o "requirements-audit-$backend.txt"
+            # The export is fully pinned, so --no-deps audits exactly the lockfile.
+            uvx pip-audit --strict --disable-pip --no-deps -r "requirements-audit-$backend.txt"
+          done
       - name: Scan for committed secrets
         uses: gitleaks/gitleaks-action@v2
         env:

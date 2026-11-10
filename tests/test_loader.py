@@ -86,3 +86,23 @@ def test_iter_input_files_expands_directories(tmp_path, make_png, text_image):
     (tmp_path / "ignore.txt").write_text("x")
     names = [p.name for p in loader.iter_input_files([tmp_path])]
     assert names == ["a.png", "b.png"]
+
+
+@pytest.mark.parametrize("fmt", ["PNG", "JPEG", "TIFF", "BMP", "WEBP"])
+def test_every_allowed_format_decodes(fmt):
+    buffer = io.BytesIO()
+    Image.new("RGB", (40, 30), "white").save(buffer, format=fmt)
+    (page,) = load_bytes(buffer.getvalue())
+    assert page.image.shape == (30, 40, 3)
+
+
+@pytest.mark.parametrize(
+    "header",
+    [
+        b"\x00\x00\x00\x0cjP  \r\n\x87\n",  # JPEG 2000 (JP2 container)
+        b"\xff\x4f\xff\x51",  # raw JPEG 2000 codestream
+    ],
+)
+def test_jpeg2000_is_rejected(header):
+    with pytest.raises(UnsupportedFileError):
+        load_bytes(header + b"\x00" * 64)

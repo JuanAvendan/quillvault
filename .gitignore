@@ -42,7 +42,7 @@ wheels/
 .coverage
 coverage.xml
 htmlcov/
-requirements-audit.txt
+requirements-audit*.txt
 
 # Editors / OS
 .vscode/

@@ -98,7 +98,9 @@ def load_bytes(data: bytes) -> list[LoadedPage]:
         images = list(_iter_pdf(data))
     else:
         try:
-            with Image.open(io.BytesIO(data)) as opened:
+            # Pin the decoder to the sniffed format so Pillow never falls back to
+            # another plugin (e.g. the bundled JPEG 2000 decoder) on hostile input.
+            with Image.open(io.BytesIO(data), formats=[kind.upper()]) as opened:
                 opened.load()
                 images = [opened.copy()]
         except Image.DecompressionBombError as exc:
