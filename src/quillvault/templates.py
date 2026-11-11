@@ -71,6 +71,78 @@ _SENTENCES = [
 ]
 
 
+STYLES = ("notes", "form")
+
+# Free-text consultation notes, the way they are usually handwritten: running
+# sentences with the common Colombian clinical abbreviations. Grouped by section so
+# each page reads like one (fictitious) note: reason → history → exam → dx → plan.
+_SYMPTOMS = [
+    "dolor abdominal",
+    "cefalea",
+    "tos seca",
+    "fiebre",
+    "dolor lumbar",
+    "mareo",
+    "odinofagia",
+    "disuria",
+    "dolor torácico",
+    "diarrea",
+    "malestar general",
+    "dolor en rodilla derecha",
+]
+_HISTORY = ["HTA", "DM2", "hipotiroidismo", "asma", "dislipidemia", "gastritis", "ninguno"]
+_LABS = [
+    "hemograma y PCR",
+    "parcial de orina",
+    "glicemia y HbA1c",
+    "perfil lipídico",
+    "TSH",
+    "creatinina y BUN",
+    "Rx de tórax",
+    "ecografía abdominal",
+]
+_SPECIALTIES = ["medicina interna", "ortopedia", "ginecología", "pediatría", "nutrición"]
+_NOTE_SECTIONS: tuple[tuple[str, ...], ...] = (
+    (  # motivo de consulta / enfermedad actual
+        "Pte de {age} años consulta por {sym}.",
+        "Consulta por {sym} de {n} días de evolución.",
+        "Refiere {sym} y {sym2}.",
+        "Cuadro de {n} días de {sym}, sin mejoría.",
+        "Niega fiebre, vómito u otros síntomas.",
+        "Refiere automedicación con {drug} sin mejoría.",
+    ),
+    (  # antecedentes
+        "Antecedentes: {hist}.",
+        "En tto con {chronic} {chronic_dose} c/{h}h.",
+        "Niega alergias a medicamentos.",
+        "Antecedente de {hist} en control.",
+    ),
+    (  # examen físico
+        "SV: TA {sys}/{dia} FC {fc} FR {fr} T° {temp}",
+        "Sat O2 {sat}% al ambiente.",
+        "Pte alerta, orientado, hidratado, afebril.",
+        "Abdomen blando, depresible, no doloroso.",
+        "Ruidos cardiacos rítmicos, sin soplos.",
+        "Murmullo vesicular conservado, sin agregados.",
+        "Faringe eritematosa, sin placas.",
+        "Dolor a la palpación en {sym_site}.",
+    ),
+    (  # diagnóstico
+        "Dx: {code} {dx}",
+        "Impresión dx: {dx}.",
+    ),
+    (  # plan
+        "Se inicia {drug} {dose} VO c/{h}h por {n} días.",
+        "Se solicita: {lab}.",
+        "Control en {weeks} semanas con resultados.",
+        "Se explican signos de alarma.",
+        "Se remite a {spec}.",
+        "Se continúa igual tto.",
+        "Abundantes líquidos y reposo relativo.",
+    ),
+)
+
+
 @dataclass(slots=True)
 class PracticeSet:
     pdf: Path
@@ -120,10 +192,84 @@ def _line_factories(rng: random.Random, fake: object) -> list[Callable[[], str]]
     ]
 
 
-def generate_lines(pages: int, lines_per_page: int, seed: int) -> list[list[str]]:
+# Relative share of lines per section (reason, history, exam, dx, plan).
+_SECTION_WEIGHTS = (3, 2, 3, 1, 3)
+
+
+def _note_context(rng: random.Random) -> dict[str, object]:
+    """Facts fixed for one note, so a page never contradicts itself."""
+    code, dx = rng.choice(_CIE10)
+    (drug, dose), (chronic, chronic_dose) = rng.sample(_DRUGS, 2)
+    sym, sym2 = rng.sample(_SYMPTOMS, 2)
+    return {
+        "age": rng.randint(1, 90),
+        "sym": sym,
+        "sym2": sym2,
+        "sym_site": rng.choice(["epigastrio", "flanco derecho", "fosa ilíaca derecha"]),
+        "hist": rng.choice(_HISTORY),
+        "drug": drug,
+        "dose": dose,
+        "chronic": chronic,
+        "chronic_dose": chronic_dose,
+        "code": code,
+        "dx": dx,
+        "sys": rng.randint(95, 170),
+        "dia": rng.randint(55, 105),
+        "fc": rng.randint(55, 120),
+        "fr": rng.randint(12, 24),
+        "temp": f"{rng.uniform(36.0, 39.2):.1f}",
+        "sat": rng.randint(88, 99),
+    }
+
+
+def _section_plan(lines_per_page: int) -> list[int]:
+    """Section index for each line, in clinical order and proportional to the weights."""
+    total = sum(_SECTION_WEIGHTS)
+    plan: list[int] = []
+    cumulative = 0
+    for section, weight in enumerate(_SECTION_WEIGHTS):
+        cumulative += weight
+        upto = round(lines_per_page * cumulative / total)
+        plan.extend([section] * max(0, upto - len(plan)))
+    return plan[:lines_per_page]
+
+
+def _note_page(rng: random.Random, lines_per_page: int) -> list[str]:
+    """One fictitious note: sections in clinical order, no line repeated."""
+    ctx = _note_context(rng)
+    page: list[str] = []
+    used: set[str] = set()
+    for section in _section_plan(lines_per_page):
+        options = _NOTE_SECTIONS[section]
+        fresh = [t for t in options if t not in used] or list(options)
+        template = rng.choice(fresh)
+        used.add(template)
+        page.append(
+            template.format(
+                **ctx,
+                n=rng.randint(2, 15),
+                weeks=rng.randint(1, 8),
+                h=rng.choice([6, 8, 12, 24]),
+                lab=rng.choice(_LABS),
+                spec=rng.choice(_SPECIALTIES),
+            )
+        )
+    return page
+
+
+def generate_lines(
+    pages: int, lines_per_page: int, seed: int, style: str = "notes"
+) -> list[list[str]]:
+    """Ground-truth lines per page. ``notes`` = free-text consultation notes,
+    ``form`` = field-per-line forms (names, IDs, dates, vitals)."""
+    if style not in STYLES:
+        raise ValueError(f"Unknown style {style!r}; choose one of {', '.join(STYLES)}")
+    rng = random.Random(seed)  # noqa: S311 - not cryptographic, reproducible dataset
+    if style == "notes":
+        return [_note_page(rng, lines_per_page) for _ in range(pages)]
+
     from faker import Faker  # noqa: PLC0415 - optional dependency
 
-    rng = random.Random(seed)  # noqa: S311 - not cryptographic, reproducible dataset
     fake = Faker("es_CO")
     fake.seed_instance(seed)
     factories = _line_factories(rng, fake)
@@ -131,7 +277,11 @@ def generate_lines(pages: int, lines_per_page: int, seed: int) -> list[list[str]
 
 
 def generate(
-    out_dir: Path, pages: int = 10, lines_per_page: int = 12, seed: int = 7
+    out_dir: Path,
+    pages: int = 10,
+    lines_per_page: int = 12,
+    seed: int = 7,
+    style: str = "notes",
 ) -> PracticeSet:
     """Write ``practice_sheets.pdf`` and ``pagina_NNN.txt`` ground-truth files."""
     from reportlab.lib.pagesizes import A4  # noqa: PLC0415
@@ -139,7 +289,7 @@ def generate(
     from reportlab.pdfgen import canvas  # noqa: PLC0415
 
     out_dir.mkdir(parents=True, exist_ok=True)
-    content = generate_lines(pages, lines_per_page, seed)
+    content = generate_lines(pages, lines_per_page, seed, style)
     pdf_path = out_dir / "practice_sheets.pdf"
     pdf = canvas.Canvas(str(pdf_path), pagesize=A4)
     pdf.setTitle("QuillVault practice sheets")

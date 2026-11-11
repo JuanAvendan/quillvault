@@ -95,6 +95,34 @@ def test_practice_sheets_are_reproducible(tmp_path):
     assert generate_lines(2, 5, seed=3) != generate_lines(2, 5, seed=4)
 
 
+def test_note_sheets_read_like_one_consistent_note():
+    from quillvault.postprocess.lexicon import Lexicon
+    from quillvault.templates import _section_plan, generate_lines
+
+    for n in (1, 5, 12, 16):
+        plan = _section_plan(n)
+        assert len(plan) == n
+        assert plan == sorted(plan)  # reason → history → exam → dx → plan
+    assert _section_plan(12).count(3) == 1  # a single diagnosis line
+
+    lexicon = Lexicon.builtin()
+    for page in generate_lines(50, 12, seed=1):
+        assert len(page) == len(set(page)) == 12
+        assert sum(line.startswith(("Dx:", "Impresión dx:")) for line in page) == 1
+        # Correct clinical words must not be flagged as misspellings.
+        assert not any(lexicon.suggest(line) for line in page)
+
+
+def test_form_style_and_unknown_style():
+    pytest.importorskip("faker")
+    from quillvault.templates import generate_lines
+
+    (page,) = generate_lines(1, 16, seed=2, style="form")
+    assert len(page) == 16
+    with pytest.raises(ValueError, match="Unknown style"):
+        generate_lines(1, 3, seed=2, style="poema")
+
+
 # --------------------------------------------------------------------------- UI helpers
 def test_review_table_round_trip(pages):
     rows = rows_from_pages(pages)

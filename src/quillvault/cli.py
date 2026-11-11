@@ -194,11 +194,17 @@ def templates(
     pages: Annotated[int, typer.Option(min=1, max=200)] = 10,
     lines: Annotated[int, typer.Option(min=1, max=16)] = 12,
     seed: int = 7,
+    style: Annotated[
+        str,
+        typer.Option(help="notes = free-text consultation notes; form = one field per line."),
+    ] = "notes",
 ) -> None:
     """Generate practice sheets with FAKE clinical data for a safe training/benchmark set."""
-    from quillvault.templates import generate  # noqa: PLC0415
+    from quillvault.templates import STYLES, generate  # noqa: PLC0415
 
-    result = generate(out, pages=pages, lines_per_page=lines, seed=seed)
+    if style not in STYLES:
+        raise typer.BadParameter(f"choose one of: {', '.join(STYLES)}", param_hint="--style")
+    result = generate(out, pages=pages, lines_per_page=lines, seed=seed, style=style)
     console.print(
         f"[green]✓[/] {result.pdf}  +  {len(result.ground_truth)} ground-truth .txt files"
     )

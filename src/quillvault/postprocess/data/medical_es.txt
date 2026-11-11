@@ -213,3 +213,15 @@ vitamina
 suero oral
 solución salina
 lactato de ringer
+# Formas frecuentes en notas de texto libre (evitan sugerencias falsas)
+antecedente
+cardiacos
+glicemia
+medicamentos
+medicina
+nutrición
+rinofaringitis
+urinarias
+eritematosa
+depresible
+automedicación

@@ -254,14 +254,13 @@ En datos clínicos que terminan en RIPS enviados al Ministerio, **ningún texto 
 
 ## 12. Plan por fases
 
-| Fase | Contenido | ¿Necesita imágenes? |
-|---|---|---|
-| **0. Base** | Repo, tooling, CI, interfaz de motores, adaptador RapidOCR, preprocesado, generador de plantillas ficticias, segmentador de líneas, script de benchmark, fixtures sintéticas, documentación de seguridad | **No**. Se puede hacer ya. |
-| **1. Benchmark** | La persona copia las plantillas; se miden RapidOCR, TrOCR base y VLM | Sí (ficticias) |
-| **2. Fine-tuning** | Ajustar TrOCR a la letra, exportar a ONNX y verificar con DirectML | Sí (ficticias) |
-| **3. Herramienta** | Pipeline completo, revisión Gradio, validadores MinSalud, exportación | No |
-| **4. Publicación** | README con benchmark, demo GIF sintética, release v0.1.0 | No |
-| **5. Integración** (opcional) | Importación JSON en la app RIPS o API (Python o C#) on-premise | No |
+| Fase | Estado | Contenido | ¿Necesita imágenes? |
+|---|---|---|---|
+| **0. Base** | ✅ v0.1.0 | Motores, preprocesado, interfaz de revisión, validadores, exportación, benchmark, plantillas ficticias, CI, repo público | No |
+| **1. Benchmark** | Pendiente | La persona copia las notas ficticias; se miden RapidOCR, TrOCR base y VLM | Sí (ficticias) |
+| **2. Fine-tuning** | Pendiente | Ajustar TrOCR a la letra, exportar a ONNX y verificar con DirectML | Sí (ficticias) |
+| **3. Texto libre → datos** | Pendiente | Reconstruir párrafos a partir de las líneas y extraer en local códigos CIE-10, medicamentos y fechas para los campos RIPS (validadores + VLM/LLM local opcional) | No |
+| **4. Integración** (opcional) | Pendiente | Importación JSON en la app RIPS o API (Python o C#) on-premise | No |
 
 ---
 
@@ -269,7 +268,8 @@ En datos clínicos que terminan en RIPS enviados al Ministerio, **ningún texto 
 
 1. **¿Siempre escribe la misma persona?** Si son varias, cambia la estrategia de fine-tuning.
 2. **¿Qué tipo de documento es?** Formulario con campos fijos, historia clínica de texto libre, orden médica…
-   - Si es un **formato fijo**, se puede leer por zonas (cada campo en su posición), lo que mejora mucho la precisión y permite mapear directo a campos RIPS.
+   - **Respuesta: texto libre** (notas de consulta). Se descarta la lectura por zonas; las hojas de práctica
+     usan por defecto notas ficticias en texto corrido (`--style notes`) y la extracción de campos RIPS pasa a la fase 3.
 3. **¿Cómo se digitalizan?** Escáner o foto con el celular. Influye en el preprocesado.
 4. **¿Volumen aproximado** de hojas por día o mes?
 5. **Nombre del repositorio.**

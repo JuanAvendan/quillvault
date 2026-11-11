@@ -100,7 +100,7 @@ for source, page in pipeline.process_paths([Path("scan.jpg")]):
 ## Evaluate on your own handwriting — without real data
 
 ```bash
-uv run quillvault templates practice/ --pages 10     # PDF with FAKE clinical lines + ground truth
+uv run quillvault templates practice/ --pages 10     # PDF of FAKE free-text clinical notes + ground truth
 # The writer copies each page by hand; save scans as practice/pagina_001.jpg, ...
 uv run quillvault benchmark practice/ -e rapidocr -e trocr -e vlm --out benchmark.md
 ```
@@ -150,7 +150,8 @@ src/quillvault/
 - [x] Phase 0 — engines, preprocessing, review UI, benchmark, security hardening, CI
 - [ ] Phase 1 — benchmark on the writer's practice sheets
 - [ ] Phase 2 — fine-tune TrOCR on synthetic sheets, export to ONNX/DirectML
-- [ ] Phase 3 — form-zone extraction mapped to RIPS fields
+- [ ] Phase 3 — free-text notes: paragraph rebuilding and local extraction of
+      CIE-10 codes, medications and dates mapped to RIPS fields
 - [ ] Phase 4 — optional on-premise API (Python or C#/.NET via ONNX Runtime)
 
 ## Development

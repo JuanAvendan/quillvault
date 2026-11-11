@@ -88,7 +88,7 @@ Si quieres que analicemos qué tal funcionó, **no compartas imágenes ni texto*
 
   ```powershell
   uv run quillvault templates practica --pages 5
-  # imprime practica\practice_sheets.pdf, que la persona lo copie a mano y escanea
+  # imprime practica\practice_sheets.pdf (notas de consulta ficticias), que la persona lo copie a mano y escanea
   # cada hoja como practica\pagina_001.jpg, pagina_002.jpg, ...
   uv run quillvault benchmark practica -e rapidocr -e trocr --out practica\benchmark.md
   ```

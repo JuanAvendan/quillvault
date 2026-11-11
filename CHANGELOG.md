@@ -6,6 +6,19 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `quillvault templates --style notes` (new default): practice sheets are fictitious
+  free-text consultation notes with common clinical abbreviations, one consistent
+  note per page. The previous field-per-line sheets remain as `--style form`.
+- Lexicon entries for frequent free-text words that were wrongly flagged.
+
+### Fixed
+- CI: mypy on Linux, dependency audit per GPU/CPU backend.
+
+### Security
+- Pillow forced to 13.0.0 (uv override; Gradio caps it below 13) to close ~40
+  advisories in 12.x decoders. `Image.open` is pinned to the sniffed format.
+
 ## [0.1.0] - 2026-11-10
 
 ### Added
